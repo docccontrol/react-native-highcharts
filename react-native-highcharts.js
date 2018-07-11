@@ -42,7 +42,7 @@ class ChartWeb extends Component {
                         <script>
                         $(function () {
                             Highcharts.setOptions(${JSON.stringify(this.props.options)});
-                            Highcharts.${this.props.stock ? 'stockChart' : 'chart'}('container', `,
+                            chart = Highcharts.${this.props.stock ? 'stockChart' : 'chart'}('container', `,
             end:`           );
                         });
                         </script>
@@ -83,7 +83,13 @@ class ChartWeb extends Component {
                   style={styles.full}
                   source={{ html: concatHTML, baseUrl: 'web/' }}
                   javaScriptEnabled={true}
-                  ref={this.props.innerRef}
+                  ref={r => {
+                      if(!r) return;
+                      r.addPoint = function (x,y) {
+                          r.injectJavaScript(`chart.series[0].addPoint([${x},${y}], true, true); void(0);`);
+					  }
+                      this.props.innerRef(r);
+				  }}
                   domStorageEnabled={true}
                   scalesPageToFit={true}
                   scrollEnabled={false}
